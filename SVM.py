@@ -2,6 +2,7 @@
 
 import csv
 import numpy as np
+import random
 
 
 x1_sepal_length = []
@@ -9,7 +10,7 @@ x2_sepal_width = []
 x3_petal_length = []
 x4_petal_width = []
 Y_flower = []
-alpha = []
+
 ################################################################################
 def Read_Data(file_name):
         #getting the system path
@@ -61,15 +62,56 @@ class SVM():
         self.max_iter = max_iter
         self.epsilon = epsilon
         self.kernel_type = kernel_type
+        self.kernels_available = {
+            'linear': self.Linear_Kernel,
+            'quadratic': self.Quadratic_Kernel
+        }
         
     
     def Train_SVM(self, Input_Flower_Features, Flower_Type):
         
         N_total_samples = Input_Flower_Features.shape[0]
         print('N_total_samples:',N_total_samples)
+        
         #we have alpha per sample of training set
         alpha = np.zeros(N_total_samples)
-        #print(alpha)     
+        #print(alpha)
+        
+        #picking the kernel specified by the user
+        self.kernel = self.kernels_available[self.kernel_type]
+        
+        
+        
+        iteration_counter = 0
+        while (True):
+            iteration_counter = iteration_counter + 1
+            
+            #saving the copy of previous alphas
+            alpha_previous = np.copy(alpha)
+            
+            #Going through all the data samples in one pass
+            for sample_index in range(0,N_total_samples):
+                #picking a random number from the sample
+                i = random.randrange(0,N_total_samples-1)
+                j = sample_index
+                x_i = Input_Flower_Features[i,:]
+                x_j = Input_Flower_Features[j,:]
+                y_i = Y_flower[i:]
+                y_j = Y_flower[j:]
+                
+                k_ij = self.kernel(x_i,x_i) + self.kernel(x_j,x_j) - 2*self.kernel(x_i,x_j)
+                if k_ij == 0:
+                    continue
+                
+                print("k_ij:",k_ij)
+            
+            
+            #Terminating Condition
+            if (iteration_counter == self.max_iter):
+                print("Max iteration reached....Stopping the training")
+                break
+            
+            
     
     def Predict_New_Flower():
         pass
